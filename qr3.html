@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0f14">
+<title>QR 3 · Легенда в AR</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>try{firebase.initializeApp(window.FIREBASE_CONFIG);}catch(e){console.warn(e);}</script>
+</head>
+<body data-qid="qr3" data-duration="180" data-mode="textarea" data-answer="казач|кладбищ|погост|могил">
+<div class="topbar"><div class="brand">Магнитка 2.0 · AR-охота</div><div class="timer" id="timer">03:00</div></div>
+<div class="bar"><i id="bar"></i></div>
+<main class="wrap">
+<div class="card" id="card">
+<span class="badge">Задание 3 из 5</span>
+<h1>Легенда в AR</h1>
+<p class="sub">Шаги, которые слышны до сих пор.</p>
+<p>Включите звук. Говорят, в некоторых старых кварталах по ночам можно услышать шаги там, где уже давно нет прохожих.</p>
+<div class="task"><span class="lbl2">Задание</span>Какая городская легенда связана со звуками шагов на лестничных площадках?</div>
+<form id="quizForm" novalidate>
+<label class="lbl" for="team">Название команды</label>
+<input id="team" type="text" placeholder="Название вашей команды" autocomplete="off">
+<label class="lbl" for="ans">Ваш ответ</label>
+<textarea id="ans" placeholder="Опишите легенду…"></textarea>
+<button id="submitBtn" type="submit" disabled>Отправить ответ</button>
+</form>
+</div>
+</main>
+<footer>Квиз «Магнитка 2.0» · Магнитогорск, 2026</footer>
+<script src="app-firebase.js"></script>
+</body>
+</html>

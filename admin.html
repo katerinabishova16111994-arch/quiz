@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Админка · Магнитка 2.0</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>try{firebase.initializeApp(window.FIREBASE_CONFIG);}catch(e){console.warn(e);}</script>
+<style>
+.wrap{max-width:1200px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 20px;align-items:center}
+.toolbar button{width:auto;padding:11px 16px;font-size:14px}
+.btn-ghost{background:transparent;color:var(--txt);border:1px solid var(--line);font-weight:700;border-radius:14px;cursor:pointer;font-family:inherit}
+.btn-danger{background:transparent;color:var(--bad);border:1px solid rgba(229,72,77,.5);font-weight:700;border-radius:14px;cursor:pointer;font-family:inherit}
+.live{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#4ade80;background:rgba(46,160,67,.12);border:1px solid rgba(46,160,67,.35);padding:7px 13px;border-radius:999px}
+.live i{width:8px;height:8px;border-radius:50%;background:#4ade80;animation:pulse 1.4s infinite}
+.live.off{color:var(--bad);background:rgba(229,72,77,.12);border-color:rgba(229,72,77,.35)}
+.live.off i{background:var(--bad)}
+@keyframes pulse{50%{opacity:.35}}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:22px}
+.stat{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.stat .k{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);font-weight:800}
+.stat .v{font-size:26px;font-weight:800;margin-top:4px;font-variant-numeric:tabular-nums}
+.stat .v.ok{color:var(--ok)}.stat .v.bad{color:var(--bad)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--card);margin-bottom:26px}
+th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:#0f151c;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);font-weight:800}
+tr:last-child td{border-bottom:0}
+td.num{font-variant-numeric:tabular-nums;text-align:center;font-weight:800}
+td.ans{max-width:280px;word-break:break-word;color:#dbe5ef}
+.pill{display:inline-block;font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;white-space:nowrap}
+.pill.ok{background:rgba(46,160,67,.15);color:#4ade80;border:1px solid rgba(46,160,67,.4)}
+.pill.bad{background:rgba(229,72,77,.15);color:#ff7b7f;border:1px solid rgba(229,72,77,.4)}
+.pill.time{background:rgba(139,152,168,.12);color:#9aa7b5;border:1px solid var(--line)}
+.manual-form{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:20px;display:grid;grid-template-columns:1fr 1fr 2fr auto;gap:12px;align-items:end}
+.manual-form label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:6px;display:block}
+.manual-form input,.manual-form select{background:#0f151c;border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:11px 13px;font:inherit;width:100%;outline:none}
+.manual-form button{padding:12px 22px;background:linear-gradient(135deg,var(--acc2),var(--acc));color:#12181f;border:0;border-radius:10px;font-weight:800;cursor:pointer;font-family:inherit;font-size:14px}
+h2{font-size:18px;margin:0 0 12px;font-weight:800}
+.sec{margin-bottom:30px}
+.empty{text-align:center;padding:50px 20px;color:var(--mut);border:1px dashed var(--line);border-radius:14px;background:var(--card)}
+.empty .ico{font-size:44px;margin-bottom:10px}
+</style>
+</head>
+15:57
+<body>
+<div class="topbar"><div class="brand">Магнитка 2.0 · панель ведущего</div><div class="timer" id="clock">--:--</div></div>
+<div class="bar"><i style="width:100%"></i></div>
+<main class="wrap">
+<div class="toolbar">
+<span class="live" id="live"><i></i> онлайн</span>
+<button class="btn-ghost" id="csv">⬇️  CSV</button>
+<button class="btn-danger" id="reset">🗑 Очистить</button>
+</div>
+<h2>📝  Ручной ввод с бумажного бланка</h2>
+<div class="manual-form">
+<div><label>Задание</label><select id="mfQid"><option value="r4q1">Задание 1</option><option value="r4q2">Задание 2</option><option value="r4q3">Задание 3</option><option value="r4q4">Задание 4</option><option value="r4q5">Задание 5</option></select></div>
+<div><label>Команда</label><input id="mfTeam" type="text" placeholder="Название"></div>
+<div><label>Ответ</label><input id="mfAnswer" type="text" placeholder="Ответ"></div>
+<button id="mfAdd">➕ Внести</button>
+</div>
+<div id="root"></div>
+</main>
+<footer>Квиз «Магнитка 2.0» · Магнитогорск, 2026</footer>
+<script>
+(function(){
+var QUIZ=[{id:"qr1",n:1,name:"Оживи историю",correct:"Сила и богатство горы Магнитной"},{id:"qr2",n:2,name:"Найди объект",correct:"Магнитогорск"},{id:"qr3",n:3,name:"Легенда в AR",correct:"Легенда о казачьем кладбище"},{id:"qr4",n:4,name:"Стальной рекорд",correct:"Иван Харитонович Ромазан"},{id:"qr5",n:5,name:"Две части света",correct:"Обе части света"}];
+var KEYS={qr1:["сила","стойкост","богатств","руд","первостро","мощь"],qr2:["магнитогорск","магнитк"],qr3:["казач","кладбищ","погост","могил"],qr4:["ромазан"],qr5:["обе"]};
+var root=document.getElementById("root");
+var live=document.getElementById("live");
+var items=[];
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]})}
+function timeOf(iso){try{return new Date(iso).toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit",second:"2-digit"})}catch(e){return ""}}
+function norm(s){return String(s||"").toLowerCase().replace(/ё/g,"е")}
+setInterval(function(){var d=new Date();document.getElementById("clock").textContent=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")},15000);
+function render(){
+if(!items.length){root.innerHTML='<div class="empty"><div class="ico">📭</div><h2>Ответов пока нет</h2><p>Ответы появятся в реальном времени.</p></div>';return}
+var total=items.length,correct=items.filter(function(a){return a.correct===true}).length;
+var timeout=items.filter(function(a){return a.timeout===true}).length;
+var pct=Math.round((correct/total)*100);
+var teams={};
+items.forEach(function(a){var t=(a.team||"—").trim();if(!teams[t])teams[t]={name:t,score:0,done:0};teams[t].done++;if(a.correct===true)teams[t].score++});
+var teamList=Object.keys(teams).map(function(k){return teams[k]}).sort(function(a,b){return b.score-a.score||b.done-a.done});
+var byQ={};
+items.forEach(function(a){if(!byQ[a.qid])byQ[a.qid]={total:0,ok:0,time:0};byQ[a.qid].total++;if(a.correct===true)byQ[a.qid].ok++;if(a.timeout===true)byQ[a.qid].time++});
+var h="";
+h+='<div class="stats"><div class="stat"><div class="k">Ответов</div><div class="v">'+total+'</div></div><div class="stat"><div class="k">Верных</div><div class="v ok">'+correct+'</div></div><div class="stat"><div class="k">Точность</div><div class="v">'+pct+'%</div></div><div class="stat"><div class="k">Таймаут</div><div class="v bad">'+timeout+'</div></div><div class="stat"><div class="k">Команд</div><div class="v">'+teamList.length+'</div></div></div>';
+h+='<div class="sec"><h2>🏆 Рейтинг AR</h2><div class="tbl-wrap"><table><thead><tr><th>#</th><th>Команда</th><th>Баллы</th><th>Ответов</th></tr></thead><tbody>';
+teamList.forEach(function(t,i){h+='<tr><td class="num">'+(i+1)+'</td><td>'+esc(t.name)+'</td><td class="num" style="color:var(--acc2)">'+(t.score*2)+'</td><td class="num">'+t.done+'</td></tr>'});
+h+='</tbody></table></div></div>';
+15:57
+h+='<div class="sec"><h2>📋 По заданиям</h2><div class="tbl-wrap"><table><thead><tr><th>№</th><th>Задание</th><th>Верно</th><th>Всего</th><th>Эталон</th></tr></thead><tbody>';
+QUIZ.forEach(function(q){var s=byQ[q.id]||{total:0,ok:0,time:0};h+='<tr><td class="num">'+q.n+'</td><td>'+esc(q.name)+'</td><td class="num" style="color:var(--ok)">'+s.ok+'</td><td class="num">'+s.total+'</td><td class="ans" style="color:var(--mut);font-size:13px">'+esc(q.correct)+'</td></tr>'});
+h+='</tbody></table></div></div>';
+var sorted=items.slice().sort(function(a,b){return (a.qid||"").localeCompare(b.qid||"")||(a.team||"").localeCompare(b.team||"")});
+h+='<div class="sec"><h2>📝  Все ответы</h2><div class="tbl-wrap"><table><thead><tr><th>Задание</th><th>Команда</th><th>Ответ</th><th>Итог</th><th>Время</th></tr></thead><tbody>';
+sorted.forEach(function(a){var q=QUIZ.filter(function(x){return x.id===a.qid})[0];var pill;if(a.timeout===true&&!a.answer)pill='<span class="pill time">таймаут</span>';else if(a.correct===true)pill='<span class="pill ok">верно</span>';else if(a.correct===false)pill='<span class="pill bad">неверно</span>';else pill='<span class="pill time">?</span>';h+='<tr><td class="num" style="text-align:left;color:var(--acc2)">'+(q?"№"+q.n+" · "+esc(q.name):esc(a.qid))+'</td><td>'+esc(a.team||"—")+'</td><td class="ans">'+(a.answer?esc(a.answer):"—")+'</td><td>'+pill+'</td><td style="color:var(--mut);white-space:nowrap">'+timeOf(a.at)+'</td></tr>'});
+h+='</tbody></table></div></div>';
+root.innerHTML=h
+}
+try{
+firebase.database().ref("answers").on("value",function(snap){var val=snap.val()||{};items=Object.keys(val).map(function(k){return val[k]});live.classList.remove("off");live.innerHTML="<i></i> онлайн";render()},function(err){live.classList.add("off");live.innerHTML="<i></i> офлайн";console.error(err)})
+}catch(e){live.classList.add("off");live.innerHTML="<i></i> Firebase не подключён";console.error(e)}
+document.getElementById("mfAdd").addEventListener("click",function(){var qid=document.getElementById("mfQid").value;var team=document.getElementById("mfTeam").value.trim();var answer=document.getElementById("mfAnswer").value.trim();if(!team||!answer)return alert("Заполните команду и ответ");var t=norm(answer);var correct=(KEYS[qid]||[]).some(function(k){return t.indexOf(k)!==-1});firebase.database().ref("answers/"+qid+"__"+team).set({qid:qid,team:team,answer:answer,correct:correct,timeout:false,at:new Date().toISOString(),manual:true}).then(function(){document.getElementById("mfAnswer").value="";alert("Внесено: "+(correct?"ВЕРНО":"НЕВЕРНО"))}).catch(function(err){alert("Ошибка: "+err.message)})});
+document.getElementById("csv").addEventListener("click",function(){if(!items.length)return alert("Пока нечего выгружать.");var rows=[["Задание","Команда","Ответ","Верно","Таймаут","Время","Ручной"]];var sorted=items.slice().sort(function(a,b){return (a.qid||"").localeCompare(b.qid||"")||(a.team||"").localeCompare(b.team||"")});sorted.forEach(function(a){var q=QUIZ.filter(function(x){return x.id===a.qid})[0];rows.push([q?"№"+q.n+" "+q.name:a.qid||"",a.team||"",a.answer||"",a.correct===true?"да":(a.correct===false?"нет":""),a.timeout===true?"да":"",a.at||"",a.manual===true?"да":""])});var q=function(v){return '"'+String(v==null?"":v).replace(/"/g,'""')+'"'};var csv="\uFEFF"+rows.map(function(r){return r.map(q).join(";")}).join("\r\n");var blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});var url=URL.createObjectURL(blob);var a=document.createElement("a");var d=new Date();var stamp=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")+"_"+String(d.getHours()).padStart(2,"0")+"-"+String(d.getMinutes()).padStart(2,"0");a.href=url;a.download="magnitka_ar_"+stamp+".csv";document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(url)},1000)});
+15:57
+document.getElementById("reset").addEventListener("click",function(){if(!confirm("Удалить все ответы?"))return;firebase.database().ref("answers").remove().then(function(){items=[];render()})});
+})();
+</script>
+</body>
+</html>
